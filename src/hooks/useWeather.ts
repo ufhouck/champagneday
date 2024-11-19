@@ -9,6 +9,8 @@ const SWR_CONFIG = {
   errorRetryCount: 3,
   errorRetryInterval: 5000,
   dedupingInterval: 60000,
+  keepPreviousData: true,
+  fallbackData: undefined
 };
 
 export function useWeather() {

@@ -1,6 +1,5 @@
-import { Wind, Thermometer, Waves, Users } from 'lucide-react';
-
-type Condition = 'perfect' | 'good' | 'moderate' | 'poor';
+import { Users, Wind, Thermometer } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 interface WeatherConditions {
   windSpeed: number;
@@ -8,147 +7,128 @@ interface WeatherConditions {
   seaTemp: number;
 }
 
-function getWindCondition(speed: number): Condition {
-  if (speed < 10) return 'perfect';
-  if (speed < 15) return 'good';
-  if (speed < 25) return 'moderate';
-  return 'poor';
+function getTimeOfDay() {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 17) return 'afternoon';
+  if (hour >= 17 && hour < 21) return 'evening';
+  return 'night';
 }
 
-function getAirTempCondition(temp: number): Condition {
-  if (temp >= 25 && temp <= 30) return 'perfect';
-  if (temp >= 22 && temp <= 32) return 'good';
-  if (temp >= 20 && temp <= 35) return 'moderate';
-  return 'poor';
+function getCrowdEstimate() {
+  const hour = new Date().getHours();
+  if (hour >= 22 || hour < 6) return 0;
+  if (hour >= 11 && hour <= 16) return Math.floor(Math.random() * 3) + 2;
+  return Math.floor(Math.random() * 2);
 }
 
-function getSeaTempCondition(temp: number): Condition {
-  if (temp >= 23 && temp <= 26) return 'perfect';
-  if (temp >= 21 && temp <= 28) return 'good';
-  if (temp >= 19 && temp <= 30) return 'moderate';
-  return 'poor';
-}
+function getOverallRecommendation(conditions: WeatherConditions) {
+  const { windSpeed, airTemp, seaTemp } = conditions;
+  const timeOfDay = getTimeOfDay();
+  const bodrumTemp = airTemp + 2;
 
-function getCrowdEstimate(hour: number): string {
-  if (hour >= 22 || hour < 6) {
-    return '0';
-  }
-  if (hour >= 11 && hour <= 16) {
-    return '2-3';
-  }
-  return '1';
-}
-
-function getOverallRecommendation(conditions: WeatherConditions): {
-  message: string;
-  className: string;
-} {
-  const wind = getWindCondition(conditions.windSpeed);
-  const air = getAirTempCondition(conditions.airTemp);
-  const sea = getSeaTempCondition(conditions.seaTemp);
-
-  if (wind === 'poor') {
+  if (airTemp < 15) {
     return {
-      message: "Today is too windy for swimming",
-      className: "bg-red-50 border-red-200 text-red-700"
+      message: `Too cold for swimming! (${airTemp}°C)`,
+      subMessage: `Even Bodrum center is chilly at ${bodrumTemp}°C`,
+      className: "bg-white shadow-lg",
+      icon: <Thermometer className="w-8 h-8 text-rose-500" />
     };
   }
 
-  if (sea === 'poor') {
+  if (windSpeed > 25) {
     return {
-      message: conditions.seaTemp < 19 
-        ? "The sea is too cold for comfortable swimming"
-        : "The sea is quite warm today, be cautious",
-      className: "bg-orange-50 border-orange-200 text-orange-700"
+      message: "Too windy for swimming today!",
+      className: "bg-white shadow-lg",
+      icon: <Wind className="w-8 h-8 text-amber-500" />
     };
   }
 
-  if (wind === 'perfect' && (air === 'perfect' || air === 'good') && (sea === 'perfect' || sea === 'good')) {
+  if (airTemp >= 25 && airTemp <= 30 && windSpeed < 15 && seaTemp >= 23) {
     return {
-      message: "Perfect conditions for swimming today!",
-      className: "bg-green-50 border-green-200 text-green-700"
+      message: timeOfDay === 'night' 
+        ? "Perfect night for a swim under the stars!" 
+        : "Perfect day for swimming!",
+      subMessage: bodrumTemp > airTemp ? "Even nicer than Bodrum center!" : undefined,
+      className: "bg-white shadow-lg",
+      icon: <Thermometer className="w-8 h-8 text-teal-500" />
     };
   }
 
-  if (wind === 'moderate') {
+  if (windSpeed > 15) {
     return {
       message: "A bit windy, but swimming is possible",
-      className: "bg-yellow-50 border-yellow-200 text-yellow-700"
+      className: "bg-white shadow-lg",
+      icon: <Wind className="w-8 h-8 text-amber-500" />
     };
   }
 
   return {
-    message: "🍺 Decent conditions for swimming",
-    className: "bg-blue-50 border-blue-200 text-blue-700"
+    message: `Nice ${timeOfDay} for swimming`,
+    className: "bg-white shadow-lg",
+    icon: <Thermometer className="w-8 h-8 text-sky-500" />
   };
 }
 
-function ConditionIndicator({ 
-  condition, 
-  icon: Icon 
-}: { 
-  condition: Condition; 
-  icon: typeof Wind 
-}) {
-  const colors = {
-    perfect: "bg-green-100",
-    good: "bg-blue-100",
-    moderate: "bg-yellow-100",
-    poor: "bg-red-100"
-  };
+interface TypewriterTextProps {
+  text: string;
+  subText?: string;
+}
+
+function TypewriterText({ text, subText }: TypewriterTextProps) {
+  const [displayText, setDisplayText] = useState("");
+  const [displaySubText, setDisplaySubText] = useState("");
+  
+  useEffect(() => {
+    let index = 0;
+    const timer = setInterval(() => {
+      if (index < text.length) {
+        setDisplayText(text.slice(0, index + 1));
+        index++;
+      } else if (subText && index < text.length + subText.length) {
+        setDisplaySubText(subText.slice(0, index - text.length + 1));
+        index++;
+      } else {
+        clearInterval(timer);
+      }
+    }, 50);
+
+    return () => clearInterval(timer);
+  }, [text, subText]);
 
   return (
-    <div className={`w-2 h-2 rounded-full ${colors[condition]}`} />
+    <div className="font-sans">
+      <h2 className="text-2xl font-semibold mb-2">{displayText}</h2>
+      {subText && <p className="text-lg text-gray-600">{displaySubText}</p>}
+    </div>
   );
 }
 
-export default function SwimRecommendation({ 
-  conditions 
-}: { 
-  conditions: WeatherConditions 
-}) {
+export default function SwimRecommendation({ conditions }: { conditions: WeatherConditions }) {
   const recommendation = getOverallRecommendation(conditions);
-  const windCondition = getWindCondition(conditions.windSpeed);
-  const airCondition = getAirTempCondition(conditions.airTemp);
-  const seaCondition = getSeaTempCondition(conditions.seaTemp);
-  const currentHour = new Date().getHours();
-  const crowdCount = getCrowdEstimate(currentHour);
+  const crowdCount = getCrowdEstimate();
+
+  const getCrowdMessage = (count: number) => {
+    if (count === 0) return "Champagne is empty right now";
+    if (count === 1) return "One person at Champagne";
+    return `${count} people at Champagne`;
+  };
 
   return (
-    <div className={`rounded-3xl border h-full flex flex-col justify-between ${recommendation.className}`}>
-      <div className="p-6">
-        <h2 className="text-xl font-semibold mb-4">{recommendation.message}</h2>
-        
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center space-x-3">
-            <Wind className="w-5 h-5" />
-            <span>Wind</span>
-            <ConditionIndicator condition={windCondition} icon={Wind} />
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <Thermometer className="w-5 h-5" />
-            <span>Air</span>
-            <ConditionIndicator condition={airCondition} icon={Thermometer} />
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <Waves className="w-5 h-5" />
-            <span>Sea</span>
-            <ConditionIndicator condition={seaCondition} icon={Waves} />
-          </div>
-        </div>
+    <div className={`rounded-2xl p-6 ${recommendation.className}`}>
+      <div className="flex items-start space-x-4 mb-6">
+        {recommendation.icon}
+        <TypewriterText 
+          text={recommendation.message} 
+          subText={recommendation.subMessage}
+        />
+      </div>
 
-        <div className="flex items-center justify-center mt-6 bg-white/50 rounded-xl p-3">
-          <div className="flex items-center space-x-2">
-            <Users className="w-5 h-5 text-purple-600" />
-            <span className="text-sm font-medium">
-              {crowdCount === '0' 
-                ? 'No one is at Champagne right now' 
-                : `${crowdCount} ${crowdCount === '1' ? 'person is' : 'people are'} at Champagne right now`}
-            </span>
-          </div>
-        </div>
+      <div className="flex items-center space-x-3 bg-gray-50 rounded-xl p-4">
+        <Users className="w-6 h-6 text-gray-600" />
+        <span className="text-lg text-gray-700">
+          {getCrowdMessage(crowdCount)}
+        </span>
       </div>
     </div>
   );
