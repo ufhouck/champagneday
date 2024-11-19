@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased bg-gray-50;
+  }
+}
+
+@layer components {
+  .material-card {
+    @apply bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .material-button {
+    @apply px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .material-button-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 
+           active:bg-blue-800 focus:outline-none focus:ring-2 
+           focus:ring-blue-500 focus:ring-offset-2;
+  }
+}
+
+@layer utilities {
+  .grid-cols-24 {
+    grid-template-columns: repeat(24, minmax(2.5rem, 1fr));
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
