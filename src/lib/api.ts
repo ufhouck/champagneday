@@ -37,7 +37,7 @@ export interface SeaData {
 }
 
 const api = axios.create({
-  timeout: 5000,
+  timeout: 10000,
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
@@ -75,47 +75,33 @@ export async function fetchWeatherData(): Promise<WeatherData> {
     };
   } catch (error) {
     console.error('Weather API error:', error);
-    throw error;
+    throw new Error('Failed to fetch weather data');
   }
 }
 
 export async function fetchSeaData(): Promise<SeaData> {
   try {
-    const { data } = await api.get(
+    const response = await api.get(
       `https://marine-api.open-meteo.com/v1/marine?latitude=${LAT}&longitude=${LON}&hourly=water_temperature&timezone=auto`
     );
     
-    // Ensure we have valid data before processing
-    if (!data?.hourly?.water_temperature?.length) {
-      throw new Error('Invalid sea temperature data received');
+    const data = response.data;
+    
+    if (!Array.isArray(data?.hourly?.water_temperature)) {
+      throw new Error('Invalid sea temperature data format');
     }
 
+    const hourlyData = data.hourly.time.map((time: string, index: number) => ({
+      dt: new Date(time).getTime() / 1000,
+      water_temperature: data.hourly.water_temperature[index]
+    }));
+
     return {
-      water_temperature: data.hourly.water_temperature[0],
-      hourly: data.hourly.time.map((time: string, index: number) => ({
-        dt: new Date(time).getTime() / 1000,
-        water_temperature: data.hourly.water_temperature[index]
-      }))
+      water_temperature: hourlyData[0].water_temperature,
+      hourly: hourlyData
     };
   } catch (error) {
     console.error('Sea data API error:', error);
-    throw error;
-  }
-}
-
-export async function fetchWindData(): Promise<number> {
-  try {
-    const { data } = await api.get(
-      `https://api.weatherapi.com/v1/current.json?key=${WEATHER_API_KEY}&q=${LAT},${LON}&aqi=no`
-    );
-    
-    if (typeof data?.current?.wind_kph !== 'number') {
-      throw new Error('Invalid wind data received');
-    }
-
-    return data.current.wind_kph / 3.6;
-  } catch (error) {
-    console.error('Wind API error:', error);
-    throw error;
+    throw new Error('Failed to fetch sea temperature data');
   }
 }

@@ -30,26 +30,26 @@ interface RouteCardProps {
 
 function RouteCard({ route, isExpanded, onToggle }: RouteCardProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow">
       <button
         onClick={onToggle}
         className="w-full text-left p-4 flex items-center justify-between"
       >
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">{route.name}</h3>
-          <p className="text-sm text-gray-500">{route.length} • {route.difficulty}</p>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{route.name}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{route.length} • {route.difficulty}</p>
         </div>
-        <Navigation className={`w-5 h-5 text-gray-400 transform transition-transform ${
+        <Navigation className={`w-5 h-5 text-gray-400 dark:text-gray-500 transform transition-transform ${
           isExpanded ? 'rotate-90' : ''
         }`} />
       </button>
       
       {isExpanded && (
-        <div className="px-4 pb-4 text-sm text-gray-600">
+        <div className="px-4 pb-4 text-sm text-gray-600 dark:text-gray-300">
           <p className="mb-2">{route.description}</p>
           <div className="flex items-center justify-between text-sm">
             <span>Duration: {route.duration}</span>
-            <button className="text-blue-600 hover:text-blue-700">
+            <button className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
               View on Map
             </button>
           </div>
@@ -66,8 +66,8 @@ export default function HikingRoutes({ compact = false }: HikingRoutesProps) {
     <div className="space-y-6">
       {!compact && (
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-800">Hiking Routes</h2>
-          <span className="text-sm text-gray-500">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Hiking Routes</h2>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             {HIKING_ROUTES.length} routes available
           </span>
         </div>

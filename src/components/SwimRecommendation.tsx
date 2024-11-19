@@ -1,4 +1,4 @@
-import { Wind, Thermometer, Waves } from 'lucide-react';
+import { Wind, Thermometer, Waves, Users } from 'lucide-react';
 
 type Condition = 'perfect' | 'good' | 'moderate' | 'poor';
 
@@ -27,6 +27,16 @@ function getSeaTempCondition(temp: number): Condition {
   if (temp >= 21 && temp <= 28) return 'good';
   if (temp >= 19 && temp <= 30) return 'moderate';
   return 'poor';
+}
+
+function getCrowdEstimate(hour: number): string {
+  if (hour >= 22 || hour < 6) {
+    return '0';
+  }
+  if (hour >= 11 && hour <= 16) {
+    return '2-3';
+  }
+  return '1';
 }
 
 function getOverallRecommendation(conditions: WeatherConditions): {
@@ -101,28 +111,43 @@ export default function SwimRecommendation({
   const windCondition = getWindCondition(conditions.windSpeed);
   const airCondition = getAirTempCondition(conditions.airTemp);
   const seaCondition = getSeaTempCondition(conditions.seaTemp);
+  const currentHour = new Date().getHours();
+  const crowdCount = getCrowdEstimate(currentHour);
 
   return (
-    <div className={`rounded-2xl border p-6 mb-8 ${recommendation.className}`}>
-      <h2 className="text-xl font-semibold mb-4">{recommendation.message}</h2>
-      
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <Wind className="w-5 h-5" />
-          <span>Wind</span>
-          <ConditionIndicator condition={windCondition} icon={Wind} />
-        </div>
+    <div className={`rounded-3xl border h-full flex flex-col justify-between ${recommendation.className}`}>
+      <div className="p-6">
+        <h2 className="text-xl font-semibold mb-4">{recommendation.message}</h2>
         
-        <div className="flex items-center space-x-3">
-          <Thermometer className="w-5 h-5" />
-          <span>Air</span>
-          <ConditionIndicator condition={airCondition} icon={Thermometer} />
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center space-x-3">
+            <Wind className="w-5 h-5" />
+            <span>Wind</span>
+            <ConditionIndicator condition={windCondition} icon={Wind} />
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <Thermometer className="w-5 h-5" />
+            <span>Air</span>
+            <ConditionIndicator condition={airCondition} icon={Thermometer} />
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <Waves className="w-5 h-5" />
+            <span>Sea</span>
+            <ConditionIndicator condition={seaCondition} icon={Waves} />
+          </div>
         </div>
-        
-        <div className="flex items-center space-x-3">
-          <Waves className="w-5 h-5" />
-          <span>Sea</span>
-          <ConditionIndicator condition={seaCondition} icon={Waves} />
+
+        <div className="flex items-center justify-center mt-6 bg-white/50 rounded-xl p-3">
+          <div className="flex items-center space-x-2">
+            <Users className="w-5 h-5 text-purple-600" />
+            <span className="text-sm font-medium">
+              {crowdCount === '0' 
+                ? 'No one is at Champagne right now' 
+                : `${crowdCount} ${crowdCount === '1' ? 'person is' : 'people are'} at Champagne right now`}
+            </span>
+          </div>
         </div>
       </div>
     </div>

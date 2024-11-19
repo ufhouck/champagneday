@@ -4,13 +4,13 @@
 
 @layer base {
   body {
-    @apply antialiased bg-gray-50;
+    @apply antialiased bg-gray-50 dark:bg-gray-900 transition-colors;
   }
 }
 
 @layer components {
   .material-card {
-    @apply bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
   }
   
   .material-button {

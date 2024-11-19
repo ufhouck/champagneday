@@ -26,25 +26,25 @@ export default function LocalPlants() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800">Local Flora</h2>
-        <span className="text-sm text-gray-500">Native species</span>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Local Flora</h2>
+        <span className="text-sm text-gray-500 dark:text-gray-400">Native species</span>
       </div>
 
       <div className="grid gap-4">
         {LOCAL_PLANTS.map((plant) => (
           <div 
             key={plant.name}
-            className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-4 shadow-sm"
+            className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl p-4 shadow-sm"
           >
             <div className="flex items-start space-x-3">
-              <Flower2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-1" />
+              <Flower2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-1" />
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">{plant.name}</h3>
-                <p className="text-sm text-gray-600 mb-2">{plant.commonName}</p>
-                <p className="text-sm text-gray-600 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{plant.name}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{plant.commonName}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                   {plant.description}
                 </p>
-                <div className="text-sm font-medium text-emerald-600">
+                <div className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
                   Best viewing: {plant.season}
                 </div>
               </div>

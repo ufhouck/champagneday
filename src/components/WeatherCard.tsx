@@ -29,49 +29,49 @@ export default function WeatherCard({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="material-card p-4">
             <div className="flex items-center space-x-4">
-              <div className="p-2 bg-blue-50 rounded-full">
-                <Wind className="w-6 h-6 text-blue-600" />
+              <div className="p-2 bg-blue-50 dark:bg-blue-900/50 rounded-full">
+                <Wind className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <div className="text-2xl font-medium text-gray-900">
+                <div className="text-2xl font-medium text-gray-900 dark:text-white">
                   {Number(windSpeed).toFixed(1)} km/h
                 </div>
-                <div className="text-sm text-gray-500">Wind Speed</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Wind Speed</div>
               </div>
             </div>
           </div>
 
           <div className="material-card p-4">
             <div className="flex items-center space-x-4">
-              <div className="p-2 bg-orange-50 rounded-full">
-                <Thermometer className="w-6 h-6 text-orange-600" />
+              <div className="p-2 bg-orange-50 dark:bg-orange-900/50 rounded-full">
+                <Thermometer className="w-6 h-6 text-orange-600 dark:text-orange-400" />
               </div>
               <div>
-                <div className="text-2xl font-medium text-gray-900">
+                <div className="text-2xl font-medium text-gray-900 dark:text-white">
                   {Number(airTemp).toFixed(1)}°C
                 </div>
-                <div className="text-sm text-gray-500">Air Temperature</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Air Temperature</div>
               </div>
             </div>
           </div>
 
           <div className="material-card p-4">
             <div className="flex items-center space-x-4">
-              <div className="p-2 bg-cyan-50 rounded-full">
-                <Waves className="w-6 h-6 text-cyan-600" />
+              <div className="p-2 bg-cyan-50 dark:bg-cyan-900/50 rounded-full">
+                <Waves className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
               </div>
               <div>
-                <div className="text-2xl font-medium text-gray-900">
+                <div className="text-2xl font-medium text-gray-900 dark:text-white">
                   {Number(seaTemp).toFixed(1)}°C
                 </div>
-                <div className="text-sm text-gray-500">Sea Temperature</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">Sea Temperature</div>
               </div>
             </div>
           </div>
         </div>
 
         <div className="mt-6 flex items-center justify-center">
-          <div className="flex items-center space-x-2 text-gray-600 bg-gray-50 px-4 py-2 rounded-full">
+          <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 px-4 py-2 rounded-full">
             <Navigation className="w-5 h-5 rotate-[220deg]" />
             <span className="text-sm">SW Wind</span>
           </div>
