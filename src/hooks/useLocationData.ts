@@ -2,42 +2,20 @@ import useSWR from 'swr';
 import { fetchLocationData } from '../lib/api';
 import type { LocationData } from '../types/weather';
 
-const FALLBACK_LOCATION_DATA: LocationData = {
-  gumusluk: {
-    temp: 24,
-    wind_speed: 18,
-    precip_mm: 0,
-    sea_temp: 22,
-    condition: {
-      text: "Sunny",
-      code: 1000
-    }
-  },
-  datca: {
-    temp: 23,
-    wind_speed: 20,
-    precip_mm: 0,
-    sea_temp: 21,
-    condition: {
-      text: "Sunny",
-      code: 1000
-    }
-  }
-};
-
 export function useLocationData() {
   const { data, error } = useSWR<LocationData>(
     'locations',
-    () => fetchLocationData().catch(() => FALLBACK_LOCATION_DATA),
+    fetchLocationData,
     { 
-      refreshInterval: 900000, // 15 minutes
-      fallbackData: FALLBACK_LOCATION_DATA,
-      revalidateOnFocus: false
+      refreshInterval: 300000, // Refresh every 5 minutes
+      revalidateOnFocus: false,
+      dedupingInterval: 60000,
+      errorRetryCount: 3
     }
   );
 
   return {
-    locationData: data ?? FALLBACK_LOCATION_DATA,
+    locationData: data,
     isLoading: !data && !error,
     error
   };

@@ -12,17 +12,14 @@ const api = axios.create({
 
 export async function fetchWeatherData(): Promise<WeatherData> {
   try {
-    const { lat, lon } = LOCATIONS.gumusluk;
-    const response = await api.get(
-      `https://api.weatherapi.com/v1/forecast.json?key=${WEATHER_API_KEY}&q=${lat},${lon}&days=2&aqi=no`
+    const { data } = await api.get(
+      `https://api.weatherapi.com/v1/forecast.json?key=${WEATHER_API_KEY}&q=${LOCATIONS.gumusluk.lat},${LOCATIONS.gumusluk.lon}&days=7&aqi=no`
     );
-    
-    const data = response.data;
-    
+
     return {
       current: {
         temp: data.current.temp_c,
-        wind_speed: data.current.wind_kph / 3.6, // Convert to m/s
+        wind_speed: data.current.wind_kph / 3.6,
         wind_deg: data.current.wind_degree,
         precip_mm: data.current.precip_mm,
         condition: {
@@ -65,9 +62,8 @@ export async function fetchWeatherData(): Promise<WeatherData> {
 
 export async function fetchSeaData(): Promise<SeaData> {
   try {
-    const { lat, lon } = LOCATIONS.gumusluk;
     const response = await api.get(
-      `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=water_temperature&timezone=auto`
+      `https://marine-api.open-meteo.com/v1/marine?latitude=${LOCATIONS.gumusluk.lat}&longitude=${LOCATIONS.gumusluk.lon}&hourly=water_temperature&timezone=auto`
     );
     
     const data = response.data;
@@ -129,16 +125,22 @@ export async function fetchLocationData(): Promise<LocationData> {
 }
 
 async function fetchLocationSeaTemp(lat: number, lon: number): Promise<number> {
-  const response = await api.get(
-    `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=water_temperature&timezone=auto`
-  );
-  
-  const data = response.data;
-  const currentTemp = Number(data.hourly.water_temperature[0]);
-  
-  if (isNaN(currentTemp)) {
-    throw new Error('Invalid sea temperature value');
-  }
+  try {
+    const response = await api.get(
+      `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=water_temperature&timezone=auto`
+    );
+    
+    const data = response.data;
+    const currentTemp = Number(data.hourly.water_temperature[0]);
+    
+    if (isNaN(currentTemp)) {
+      throw new Error('Invalid sea temperature value');
+    }
 
-  return currentTemp;
+    return currentTemp;
+  } catch (error) {
+    console.error('Sea temperature API error:', error);
+    // Return a reasonable fallback value for the region
+    return 22;
+  }
 }
