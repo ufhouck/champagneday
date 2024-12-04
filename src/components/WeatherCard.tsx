@@ -31,12 +31,12 @@ export default function WeatherCard({ conditions, isToday }: WeatherCardProps) {
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
         </div>
 
-        <div className="relative p-6">
-          <div className="mb-6">
+        <div className="relative p-4 sm:p-6">
+          <div className="mb-4 sm:mb-6">
             <TypewriterText text={message} subText={subMessage} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
             <WeatherInfo label="Air" value={airTemp} unit="°C" icon={Thermometer} />
             <WeatherInfo label="Sea" value={seaTemp} unit="°C" icon={Waves} />
             <WindInfo speed={windSpeed} degree={windDeg} />
@@ -61,15 +61,15 @@ export default function WeatherCard({ conditions, isToday }: WeatherCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6">
-      <div className="mb-6">
+    <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
+      <div className="mb-4 sm:mb-6">
         <div className="text-gray-800">
-          <h2 className="text-2xl font-semibold mb-2">{message}</h2>
-          {subMessage && <p className="text-lg text-gray-600">{subMessage}</p>}
+          <h2 className="text-xl sm:text-2xl font-semibold mb-2">{message}</h2>
+          {subMessage && <p className="text-base sm:text-lg text-gray-600">{subMessage}</p>}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
         <WeatherInfo label="Air" value={airTemp} unit="°C" icon={Thermometer} variant="dark" />
         <WeatherInfo label="Sea" value={seaTemp} unit="°C" icon={Waves} variant="dark" />
         <WindInfo speed={windSpeed} degree={windDeg} variant="dark" />

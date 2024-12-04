@@ -44,22 +44,22 @@ export default function LocationComparison({ locationData }: LocationComparisonP
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6">
+    <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
       <h3 className="text-xl font-semibold text-gray-800 mb-4">Location Comparison</h3>
       
-      <div className="grid gap-4">
+      <div className="grid gap-2 sm:gap-4">
         {comparisons.map(({ label, gumusluk, datca, unit, icon: Icon, diff }) => (
-          <div key={label} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-            <div className="flex items-center space-x-3">
+          <div key={label} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-gray-50 rounded-xl">
+            <div className="flex items-center space-x-3 mb-2 sm:mb-0">
               <Icon className="w-5 h-5 text-gray-600" />
               <span className="font-medium text-gray-800">{label}</span>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
+            <div className="flex items-center justify-between sm:space-x-4">
+              <div className="text-left sm:text-right">
                 <div className="text-sm text-gray-500">Gümüşlük</div>
                 <div className="font-medium">{gumusluk.toFixed(1)}{unit}</div>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right">
                 <div className="text-sm text-gray-500">Datça</div>
                 <div className="font-medium">{datca.toFixed(1)}{unit}</div>
               </div>

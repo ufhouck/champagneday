@@ -66,20 +66,20 @@ export default function WindInfo({ speed, degree, variant = 'light' }: WindInfoP
             }`}
           />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
-            <span className="text-base font-medium">
+            <span className="text-base font-medium truncate">
               {speed.toFixed(1)} km/h
             </span>
-            <span className={`text-sm ${variant === 'light' ? 'text-white/90' : 'text-gray-600'}`}>
+            <span className={`text-sm truncate ml-2 ${variant === 'light' ? 'text-white/90' : 'text-gray-600'}`}>
               {windDescription}
             </span>
           </div>
           <div className="text-sm mt-0.5 space-y-1">
-            <span className={variant === 'light' ? 'text-white/80' : 'text-gray-500'}>
+            <span className={`block truncate ${variant === 'light' ? 'text-white/80' : 'text-gray-500'}`}>
               From {fullDirection}
             </span>
-            <div className={variant === 'light' ? 'text-white/90' : 'text-gray-600'}>
+            <div className={`truncate ${variant === 'light' ? 'text-white/90' : 'text-gray-600'}`}>
               {activityMessage}
             </div>
           </div>
