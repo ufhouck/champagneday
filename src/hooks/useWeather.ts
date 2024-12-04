@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { fetchWeatherData, fetchSeaData } from '../lib/api';
-import type { WeatherData, SeaData } from '../lib/api';
+import type { WeatherData, SeaData } from '../types/weather';
 import { FALLBACK_WEATHER, FALLBACK_SEA } from '../lib/fallback';
 
 const SWR_CONFIG = {
@@ -9,8 +9,7 @@ const SWR_CONFIG = {
   errorRetryCount: 3,
   errorRetryInterval: 5000,
   dedupingInterval: 60000,
-  keepPreviousData: true,
-  fallbackData: undefined
+  keepPreviousData: true
 };
 
 export function useWeather() {
@@ -19,8 +18,8 @@ export function useWeather() {
     () => fetchWeatherData().catch(() => FALLBACK_WEATHER),
     { 
       ...SWR_CONFIG,
-      refreshInterval: 900000,
-      fallbackData: FALLBACK_WEATHER,
+      refreshInterval: 900000, // 15 minutes
+      fallbackData: FALLBACK_WEATHER
     }
   );
 
@@ -30,7 +29,7 @@ export function useWeather() {
     { 
       ...SWR_CONFIG,
       refreshInterval: 900000,
-      fallbackData: FALLBACK_SEA,
+      fallbackData: FALLBACK_SEA
     }
   );
 
