@@ -1,0 +1,16 @@
+{
+  "moments": [
+    {
+      "id": "1",
+      "text": "Beautiful morning at Champagne Bay! The water is crystal clear and perfect for swimming.",
+      "timestamp": 1709913600000,
+      "likes": 2,
+      "weather": {
+        "temp": 24.5,
+        "windSpeed": 12,
+        "precipMm": 0,
+        "condition": "Sunny"
+      }
+    }
+  ]
+}

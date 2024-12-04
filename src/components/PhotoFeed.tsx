@@ -1,74 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Camera, Upload, Trash2, Thermometer, Wind, CloudRain } from 'lucide-react';
 import type { WeatherData } from '../types/weather';
-
-interface PhotoPost {
-  id: string;
-  imageUrl: string;
-  timestamp: number;
-  weather: {
-    temp: number;
-    windSpeed: number;
-    precipMm: number;
-    condition: string;
-  };
-}
+import { usePhotos } from '../hooks/usePhotos';
 
 interface PhotoFeedProps {
   weatherData: WeatherData;
 }
 
-// Use localStorage to persist photos
-const STORAGE_KEY = 'champagne-bay-photos';
-
 export default function PhotoFeed({ weatherData }: PhotoFeedProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [photos, setPhotos] = useState<PhotoPost[]>([]);
+  const { photos, isLoading, error, uploadPhoto, deletePhoto } = usePhotos();
 
-  // Load photos from localStorage on mount
-  useEffect(() => {
-    const savedPhotos = localStorage.getItem(STORAGE_KEY);
-    if (savedPhotos) {
-      setPhotos(JSON.parse(savedPhotos));
-    }
-  }, []);
-
-  // Save photos to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(photos));
-  }, [photos]);
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
 
-    // Create a FileReader to read the image as a data URL
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const newPhoto: PhotoPost = {
-        id: Math.random().toString(36).substring(7),
-        imageUrl: reader.result as string,
-        timestamp: Date.now(),
-        weather: {
-          temp: weatherData.current.temp,
-          windSpeed: weatherData.current.wind_speed,
-          precipMm: weatherData.current.precip_mm,
-          condition: weatherData.current.condition.text
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        if (typeof reader.result === 'string') {
+          await uploadPhoto({
+            imageData: reader.result,
+            weather: {
+              temp: weatherData.current.temp,
+              windSpeed: weatherData.current.wind_speed,
+              precipMm: weatherData.current.precip_mm,
+              condition: weatherData.current.condition.text
+            }
+          });
         }
       };
-      setPhotos(prevPhotos => [newPhoto, ...prevPhotos]);
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+    } finally {
       setIsUploading(false);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this photo?')) {
-      setPhotos(prevPhotos => prevPhotos.filter(photo => photo.id !== id));
     }
-  };
+  }, [weatherData, uploadPhoto]);
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Loading photos...</h3>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+        <h3 className="text-lg font-medium text-red-600 mb-2">Failed to load photos</h3>
+        <p className="text-gray-500">Please try again later</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -132,7 +119,7 @@ export default function PhotoFeed({ weatherData }: PhotoFeedProps) {
                     {new Date(photo.timestamp).toLocaleString()}
                   </div>
                   <button 
-                    onClick={() => handleDelete(photo.id)}
+                    onClick={() => deletePhoto(photo.id, photo.imageUrl)}
                     className="p-2 hover:bg-red-50 rounded-full group transition-colors"
                   >
                     <Trash2 className="w-5 h-5 text-gray-400 group-hover:text-red-500 transition-colors" />

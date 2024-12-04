@@ -10,13 +10,18 @@ const api = axios.create({
   }
 });
 
+// Serialize response data to prevent Symbol cloning issues
+function serializeData<T>(data: T): T {
+  return JSON.parse(JSON.stringify(data));
+}
+
 export async function fetchWeatherData(): Promise<WeatherData> {
   try {
     const { data } = await api.get(
       `https://api.weatherapi.com/v1/forecast.json?key=${WEATHER_API_KEY}&q=${LOCATIONS.gumusluk.lat},${LOCATIONS.gumusluk.lon}&days=7&aqi=no`
     );
 
-    return {
+    const weatherData = {
       current: {
         temp: data.current.temp_c,
         wind_speed: data.current.wind_kph / 3.6,
@@ -54,6 +59,8 @@ export async function fetchWeatherData(): Promise<WeatherData> {
         }
       }))
     };
+
+    return serializeData(weatherData);
   } catch (error) {
     console.error('Weather API error:', error);
     throw new Error('Failed to fetch weather data');
@@ -72,10 +79,12 @@ export async function fetchSeaData(): Promise<SeaData> {
       water_temperature: Number(data.hourly.water_temperature[index])
     })).filter((item: any) => !isNaN(item.water_temperature));
 
-    return {
+    const seaData = {
       water_temperature: hourlyData[0].water_temperature,
       hourly: hourlyData
     };
+
+    return serializeData(seaData);
   } catch (error) {
     console.error('Sea data API error:', error);
     throw new Error('Failed to fetch sea temperature data');
@@ -94,7 +103,7 @@ export async function fetchLocationData(): Promise<LocationData> {
       fetchLocationSeaTemp(LOCATIONS.datca.lat, LOCATIONS.datca.lon)
     ]);
 
-    return {
+    const locationData = {
       gumusluk: {
         temp: gumuslukData.data.current.temp_c,
         wind_speed: gumuslukData.data.current.wind_kph / 3.6,
@@ -118,6 +127,8 @@ export async function fetchLocationData(): Promise<LocationData> {
         }
       }
     };
+
+    return serializeData(locationData);
   } catch (error) {
     console.error('Location data API error:', error);
     throw new Error('Failed to fetch location data');
@@ -140,7 +151,6 @@ async function fetchLocationSeaTemp(lat: number, lon: number): Promise<number> {
     return currentTemp;
   } catch (error) {
     console.error('Sea temperature API error:', error);
-    // Return a reasonable fallback value for the region
-    return 22;
+    return 22; // Fallback value
   }
 }
