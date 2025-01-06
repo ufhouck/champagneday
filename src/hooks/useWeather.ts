@@ -1,45 +1,54 @@
 import useSWR from 'swr';
-import { fetchWeatherData, fetchSeaData } from '../lib/api';
-import type { WeatherData, SeaData } from '../types/weather';
-import { FALLBACK_WEATHER, FALLBACK_SEA } from '../lib/fallback';
+import { fetchWeatherData } from '../lib/api/weather';
+import { fetchSeaTemperature } from '../lib/api/seaTemp';
+import { CACHE_DURATION, DEFAULTS } from '../config/api';
+import type { WeatherData } from '../types/weather';
 
-const SWR_CONFIG = {
-  revalidateOnFocus: false,
-  shouldRetryOnError: true,
-  errorRetryCount: 3,
-  errorRetryInterval: 5000,
-  dedupingInterval: 60000,
-  keepPreviousData: true
+const FALLBACK_WEATHER: WeatherData = {
+  current: {
+    temp: DEFAULTS.AIR_TEMP,
+    wind_speed: DEFAULTS.WIND_SPEED,
+    wind_deg: 180,
+    precip_mm: 0,
+    condition: {
+      text: 'Clear sky',
+      code: 800
+    }
+  },
+  daily: []
 };
 
 export function useWeather() {
+  // Fetch weather data
   const { data: weatherData, error: weatherError } = useSWR<WeatherData>(
     'weather',
-    () => fetchWeatherData().catch(() => FALLBACK_WEATHER),
-    { 
-      ...SWR_CONFIG,
-      refreshInterval: 900000, // 15 minutes
+    fetchWeatherData,
+    {
+      refreshInterval: CACHE_DURATION.WEATHER,
+      revalidateOnFocus: false,
+      dedupingInterval: 60000,
+      errorRetryCount: 3,
       fallbackData: FALLBACK_WEATHER
     }
   );
 
-  const { data: seaData, error: seaError } = useSWR<SeaData>(
-    'sea',
-    () => fetchSeaData().catch(() => FALLBACK_SEA),
-    { 
-      ...SWR_CONFIG,
-      refreshInterval: 900000,
-      fallbackData: FALLBACK_SEA
+  // Fetch sea temperature
+  const { data: seaTemp } = useSWR(
+    'seaTemp',
+    fetchSeaTemperature,
+    {
+      refreshInterval: CACHE_DURATION.SEA_TEMP,
+      revalidateOnFocus: false,
+      dedupingInterval: 60000,
+      errorRetryCount: 3,
+      fallbackData: DEFAULTS.SEA_TEMP
     }
   );
 
-  const hasError = Boolean(weatherError || seaError);
-  const isLoading = !weatherData || !seaData;
-
   return {
     weatherData: weatherData ?? FALLBACK_WEATHER,
-    seaData: seaData ?? FALLBACK_SEA,
-    isLoading: isLoading && !hasError,
-    error: hasError,
+    seaTemp: seaTemp ?? DEFAULTS.SEA_TEMP,
+    isLoading: !weatherData,
+    error: weatherError
   };
 }

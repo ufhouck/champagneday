@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 interface TypewriterTextProps {
   text: string;
   subText?: string;
+  variant?: 'light' | 'dark';
 }
 
-export default function TypewriterText({ text, subText }: TypewriterTextProps) {
+export default function TypewriterText({ text, subText, variant = 'light' }: TypewriterTextProps) {
   const [displayText, setDisplayText] = useState("");
   const [displaySubText, setDisplaySubText] = useState("");
   
@@ -26,10 +27,13 @@ export default function TypewriterText({ text, subText }: TypewriterTextProps) {
     return () => clearInterval(timer);
   }, [text, subText]);
 
+  const textColor = variant === 'light' ? 'text-white' : 'text-gray-800';
+  const subTextColor = variant === 'light' ? 'text-white/90' : 'text-gray-600';
+
   return (
     <div className="font-sans">
-      <h2 className="text-2xl font-semibold mb-2 text-white">{displayText}</h2>
-      {subText && <p className="text-lg text-white/90">{displaySubText}</p>}
+      <h2 className={`text-2xl font-semibold mb-2 ${textColor}`}>{displayText}</h2>
+      {subText && <p className={`text-lg ${subTextColor}`}>{displaySubText}</p>}
     </div>
   );
 }

@@ -1,34 +1,32 @@
 import type { Moment, MomentInput } from '../types/moments';
 
-// In-memory cache
-let momentsCache: Moment[] = [];
-let lastFetch = 0;
-const CACHE_DURATION = 30000; // 30 seconds
+const STORAGE_KEY = 'moments';
 
-export async function getMoments(): Promise<Moment[]> {
-  const now = Date.now();
-  
-  // Use cache if available and fresh
-  if (momentsCache.length > 0 && now - lastFetch < CACHE_DURATION) {
-    return momentsCache;
-  }
-
+function getMomentsFromStorage(): Moment[] {
   try {
-    const response = await fetch('/data/moments.json');
-    if (!response.ok) return [];
-    
-    const data = await response.json();
-    momentsCache = data.moments || [];
-    lastFetch = now;
-    
-    return momentsCache.sort((a, b) => b.timestamp - a.timestamp);
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
   } catch (error) {
-    console.error('Error reading moments:', error);
-    return momentsCache;
+    console.error('Error reading from localStorage:', error);
+    return [];
   }
 }
 
+function saveMomentsToStorage(moments: Moment[]): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(moments));
+  } catch (error) {
+    console.error('Error saving to localStorage:', error);
+  }
+}
+
+export async function getMoments(): Promise<Moment[]> {
+  return getMomentsFromStorage().sort((a, b) => b.timestamp - a.timestamp);
+}
+
 export async function addMoment({ text, weather }: MomentInput): Promise<Moment> {
+  const moments = getMomentsFromStorage();
+  
   const moment: Moment = {
     id: crypto.randomUUID(),
     text,
@@ -37,65 +35,24 @@ export async function addMoment({ text, weather }: MomentInput): Promise<Moment>
     weather
   };
 
-  const moments = [moment, ...momentsCache];
+  moments.unshift(moment);
+  saveMomentsToStorage(moments);
   
-  try {
-    const response = await fetch('/.netlify/functions/moments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ moments })
-    });
-
-    if (!response.ok) throw new Error('Failed to save moment');
-    
-    momentsCache = moments;
-    lastFetch = Date.now();
-    
-    return moment;
-  } catch (error) {
-    console.error('Error adding moment:', error);
-    throw error;
-  }
+  return moment;
 }
 
 export async function likeMoment(id: string): Promise<void> {
-  const moments = momentsCache.map(m => 
-    m.id === id ? { ...m, likes: m.likes + 1 } : m
-  );
-
-  try {
-    const response = await fetch('/.netlify/functions/moments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ moments })
-    });
-
-    if (!response.ok) throw new Error('Failed to update moment');
-    
-    momentsCache = moments;
-    lastFetch = Date.now();
-  } catch (error) {
-    console.error('Error liking moment:', error);
-    throw error;
+  const moments = getMomentsFromStorage();
+  const moment = moments.find(m => m.id === id);
+  
+  if (moment) {
+    moment.likes += 1;
+    saveMomentsToStorage(moments);
   }
 }
 
 export async function deleteMoment(id: string): Promise<void> {
-  const moments = momentsCache.filter(m => m.id !== id);
-
-  try {
-    const response = await fetch('/.netlify/functions/moments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ moments })
-    });
-
-    if (!response.ok) throw new Error('Failed to delete moment');
-    
-    momentsCache = moments;
-    lastFetch = Date.now();
-  } catch (error) {
-    console.error('Error deleting moment:', error);
-    throw error;
-  }
+  const moments = getMomentsFromStorage();
+  const filteredMoments = moments.filter(m => m.id !== id);
+  saveMomentsToStorage(filteredMoments);
 }

@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
@@ -9,7 +10,7 @@ interface State {
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
     error: null
@@ -20,19 +21,24 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Weather app error:', error, errorInfo);
+    console.error('Application error:', error, errorInfo);
   }
 
   public render() {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="bg-white p-8 rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h2>
-            <p className="text-gray-600 mb-4">We're having trouble loading the weather data.</p>
+          <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+            <div className="flex items-center space-x-3 mb-4">
+              <AlertTriangle className="w-6 h-6 text-red-500" />
+              <h2 className="text-xl font-semibold text-gray-900">Something went wrong</h2>
+            </div>
+            <p className="text-gray-600 mb-6">
+              We encountered an error while loading the application. Please try refreshing the page.
+            </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
             >
               Refresh Page
             </button>
@@ -44,3 +50,5 @@ export class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+export default ErrorBoundary;

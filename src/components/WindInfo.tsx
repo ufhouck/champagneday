@@ -1,13 +1,17 @@
-import { getMaritimeConditions } from '../utils/windUtils';
+import { getMaritimeConditions } from '../utils/weather/wind';
 import WindCompass from './WindCompass';
 
 interface WindInfoProps {
-  speed: number;
-  degree: number;
+  speed?: number;
+  degree?: number;
   variant?: 'light' | 'dark';
 }
 
-export default function WindInfo({ speed, degree, variant = 'light' }: WindInfoProps) {
+export default function WindInfo({ 
+  speed = 0, 
+  degree = 0, 
+  variant = 'light' 
+}: WindInfoProps) {
   const conditions = getMaritimeConditions(speed, degree);
   
   const baseClasses = "flex items-center justify-between rounded-xl p-3 transition-all";

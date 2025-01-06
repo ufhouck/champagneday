@@ -1,14 +1,35 @@
-import axios from 'axios';
 import type { Moment, MomentInput } from '../types/moments';
 
 const ZAPIER_WEBHOOK_URL = 'https://hooks.zapier.com/hooks/catch/20919244/2ic9avg/';
 
+async function fetchWithTimeout(url: string, options = {}, timeout = 5000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, { 
+      ...options, 
+      signal: controller.signal 
+    });
+    clearTimeout(id);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return response.json();
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+}
+
 export async function getMoments(): Promise<Moment[]> {
   try {
-    const response = await axios.get(ZAPIER_WEBHOOK_URL);
+    const data = await fetchWithTimeout(ZAPIER_WEBHOOK_URL);
     
     // Transform the Zapier Tables data to our Moment type
-    const moments = response.data.map((item: any) => ({
+    const moments = data.map((item: any) => ({
       id: item.id,
       text: item.text,
       timestamp: parseInt(item.timestamp),
@@ -50,7 +71,14 @@ export async function addMoment({ text, weather }: MomentInput): Promise<Moment>
       weather_condition: weather.condition
     };
 
-    await axios.post(ZAPIER_WEBHOOK_URL, zapierData);
+    await fetchWithTimeout(ZAPIER_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(zapierData)
+    });
+
     return moment;
   } catch (error) {
     console.error('Error adding moment:', error);
@@ -61,8 +89,8 @@ export async function addMoment({ text, weather }: MomentInput): Promise<Moment>
 export async function likeMoment(id: string): Promise<void> {
   try {
     // Get current moments to find the one to update
-    const response = await axios.get(ZAPIER_WEBHOOK_URL);
-    const moment = response.data.find((item: any) => item.id === id);
+    const data = await fetchWithTimeout(ZAPIER_WEBHOOK_URL);
+    const moment = data.find((item: any) => item.id === id);
     
     if (!moment) {
       throw new Error('Moment not found');
@@ -75,10 +103,16 @@ export async function likeMoment(id: string): Promise<void> {
       likes: (currentLikes + 1).toString()
     };
 
-    await axios.post(ZAPIER_WEBHOOK_URL, {
-      action: 'update',
-      id,
-      data: zapierData
+    await fetchWithTimeout(ZAPIER_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: 'update',
+        id,
+        data: zapierData
+      })
     });
   } catch (error) {
     console.error('Error liking moment:', error);
@@ -88,9 +122,15 @@ export async function likeMoment(id: string): Promise<void> {
 
 export async function deleteMoment(id: string): Promise<void> {
   try {
-    await axios.post(ZAPIER_WEBHOOK_URL, {
-      action: 'delete',
-      id
+    await fetchWithTimeout(ZAPIER_WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        action: 'delete',
+        id
+      })
     });
   } catch (error) {
     console.error('Error deleting moment:', error);

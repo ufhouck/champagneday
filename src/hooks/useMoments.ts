@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getMoments, addMoment, deleteMoment, likeMoment } from '../lib/zapier';
+import { getMoments, addMoment, deleteMoment, likeMoment } from '../lib/storage';
 import type { Moment } from '../types/moments';
 
 export function useMoments() {
@@ -23,8 +23,6 @@ export function useMoments() {
 
   useEffect(() => {
     fetchMoments();
-    const interval = setInterval(fetchMoments, 30000); // Poll every 30 seconds
-    return () => clearInterval(interval);
   }, []);
 
   const handleAddMoment = async (text: string, weather: Moment['weather']) => {

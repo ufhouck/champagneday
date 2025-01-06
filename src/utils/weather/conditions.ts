@@ -1,12 +1,14 @@
-import type { WeatherCondition } from '../types/weather';
+import type { WeatherCondition } from '../../types/weather';
 
+// OpenWeatherMap condition codes
 export function isRainyCondition(code: number): boolean {
-  // OpenWeatherMap rain condition codes
-  return code >= 200 && code <= 531;
+  return (code >= 200 && code <= 531) || // Thunderstorm, drizzle, rain
+         (code >= 611 && code <= 616);    // Sleet
 }
 
-export function getWeatherDescription(code: number): string {
-  // OpenWeatherMap condition codes
+export function getWeatherDescription(condition: WeatherCondition): string {
+  const { code, text } = condition;
+  
   if (code >= 200 && code < 300) return 'Thunderstorm';
   if (code >= 300 && code < 400) return 'Drizzle';
   if (code >= 500 && code < 600) return 'Rain';
@@ -14,5 +16,6 @@ export function getWeatherDescription(code: number): string {
   if (code >= 700 && code < 800) return 'Atmosphere';
   if (code === 800) return 'Clear';
   if (code > 800) return 'Clouds';
-  return 'Unknown';
+  
+  return text || 'Unknown';
 }

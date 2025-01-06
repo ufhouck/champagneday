@@ -1,21 +1,20 @@
-import { Wind } from 'lucide-react';
+import React from 'react';
+import { LucideIcon } from 'lucide-react';
 
 interface WeatherInfoProps {
   label: string;
   value: number;
   unit: string;
-  icon: typeof Wind;
+  icon: LucideIcon;
   variant?: 'light' | 'dark';
-  condition?: string;
 }
 
 export default function WeatherInfo({ 
   label, 
   value, 
   unit, 
-  icon: Icon, 
-  variant = 'light',
-  condition 
+  icon: Icon,
+  variant = 'light'
 }: WeatherInfoProps) {
   const baseClasses = "flex items-center space-x-3 rounded-xl p-3";
   const variantClasses = variant === 'light' 
@@ -24,14 +23,9 @@ export default function WeatherInfo({
 
   return (
     <div className={`${baseClasses} ${variantClasses}`}>
-      <Icon className={`w-5 h-5 ${variant === 'light' ? 'text-white' : 'text-gray-600'}`} />
-      <div>
-        <span className="text-base font-medium">
-          {label}: {value.toFixed(1)}{unit}
-        </span>
-        {condition && (
-          <span className="block text-sm opacity-75">{condition}</span>
-        )}
+      <Icon className={variant === 'light' ? 'text-white' : 'text-gray-600'} />
+      <div className="text-sm font-medium">
+        {label}: {value.toFixed(1)}{unit}
       </div>
     </div>
   );

@@ -1,14 +1,6 @@
-export function getTimeOfDay(): 'morning' | 'afternoon' | 'evening' | 'night' {
+export function getTimeBasedEstimate(): number {
   const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return 'morning';
-  if (hour >= 12 && hour < 17) return 'afternoon';
-  if (hour >= 17 && hour < 21) return 'evening';
-  return 'night';
-}
-
-// Fallback estimation when HERE API fails
-export function getCrowdEstimate(): number {
-  const hour = new Date().getHours();
+  
   if (hour >= 22 || hour < 6) return 0;
   if (hour >= 11 && hour <= 16) return Math.floor(Math.random() * 5) + 8; // 8-12 people
   if (hour >= 9 && hour < 11) return Math.floor(Math.random() * 3) + 5;   // 5-7 people

@@ -1,36 +1,23 @@
-import type { WeatherData } from '../types/weather';
-
-const API_KEY = 'your_api_key'; // Should be in .env file
-
-async function fetchWithTimeout(url: string, timeout = 5000) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const response = await fetch(url, { signal: controller.signal });
-    clearTimeout(id);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    return response.json();
-  } catch (error) {
-    clearTimeout(id);
-    throw error;
-  }
-}
+import { fetchWithTimeout } from '../utils/fetch';
+import { API_URLS, API_KEYS, LOCATION } from '../../config/api';
+import type { WeatherData } from '../../types/weather';
 
 export async function fetchWeatherData(): Promise<WeatherData> {
   try {
-    const data = await fetchWithTimeout(
-      `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=37.0407,27.2342&days=7&aqi=no`
-    );
+    const url = new URL(`${API_URLS.WEATHER}/forecast.json`);
+    const params = new URLSearchParams({
+      key: API_KEYS.WEATHER,
+      q: `${LOCATION.LAT},${LOCATION.LON}`,
+      days: '2',
+      aqi: 'no'
+    });
+
+    const data = await fetchWithTimeout(`${url}?${params}`);
 
     return {
       current: {
         temp: data.current.temp_c,
-        wind_speed: data.current.wind_kph / 3.6,
+        wind_speed: data.current.wind_kph / 3.6, // Convert to m/s
         wind_deg: data.current.wind_degree,
         precip_mm: data.current.precip_mm,
         condition: {
@@ -56,6 +43,6 @@ export async function fetchWeatherData(): Promise<WeatherData> {
     };
   } catch (error) {
     console.error('Weather API error:', error);
-    throw new Error('Failed to fetch weather data');
+    throw error;
   }
 }
