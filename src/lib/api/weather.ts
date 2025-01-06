@@ -2,7 +2,42 @@ import { fetchWithTimeout } from '../utils/fetch';
 import { API_URLS, API_KEYS, LOCATION } from '../../config/api';
 import type { WeatherData } from '../../types/weather';
 
+const CACHE_KEY = 'weatherData';
+const CACHE_DURATION = 30 * 60 * 1000; // 30 dakika
+
+function getCachedWeather(): WeatherData | null {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!cached) return null;
+
+    const { data, timestamp } = JSON.parse(cached);
+    if (Date.now() - timestamp < CACHE_DURATION) {
+      return data;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function cacheWeather(data: WeatherData): void {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({
+      data,
+      timestamp: Date.now()
+    }));
+  } catch (error) {
+    console.warn('Failed to cache weather data:', error);
+  }
+}
+
 export async function fetchWeatherData(): Promise<WeatherData> {
+  // Önce cache'e bak
+  const cachedData = getCachedWeather();
+  if (cachedData) {
+    return cachedData;
+  }
+
   try {
     const url = new URL(`${API_URLS.WEATHER}/forecast.json`);
     const params = new URLSearchParams({
@@ -13,11 +48,10 @@ export async function fetchWeatherData(): Promise<WeatherData> {
     });
 
     const data = await fetchWithTimeout(`${url}?${params}`);
-
-    return {
+    const weatherData: WeatherData = {
       current: {
         temp: data.current.temp_c,
-        wind_speed: data.current.wind_kph / 3.6, // Convert to m/s
+        wind_speed: data.current.wind_kph / 3.6,
         wind_deg: data.current.wind_degree,
         precip_mm: data.current.precip_mm,
         condition: {
@@ -41,6 +75,9 @@ export async function fetchWeatherData(): Promise<WeatherData> {
         }
       }))
     };
+
+    cacheWeather(weatherData);
+    return weatherData;
   } catch (error) {
     console.error('Weather API error:', error);
     throw error;
